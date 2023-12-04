@@ -1,63 +1,92 @@
-﻿using API.Controllers.CatsController;
+﻿using Application.Commands.Birds.UpdateBird;
 using Application.Commands.Cats;
-using Application.Commands.Dogs.UpdateDog;
+using Application.Commands.Cats.AddCat;
+using Application.Commands.Cats.DeleteCat;
+using Application.Commands.Cats.UpdateCat;
 using Application.Dtos;
 using Application.Queries.Cats.GetAll;
 using Application.Queries.Cats.GetById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
-namespace API.Controllers.CatsConroller
+namespace API.Controllers.CatsController
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CatsController : ControllerBase
     {
         internal readonly IMediator _mediator;
+
+        // Konstruktor som tar en instans av IMediator (MediatR används för att implementera CQRS-mönstret)
         public CatsController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
-        // Get all cats from database
+        // Hämta alla katter från databasen
         [HttpGet]
         [Route("getAllCats")]
         public async Task<IActionResult> GetAllCats()
         {
+            // Anropa GetAllCatsQuery för att hämta alla katter från databasen
             return Ok(await _mediator.Send(new GetAllCatsQuery()));
-            //return Ok("GET ALL CATS");
         }
 
-        // Get a cat by Id
+        // Hämta en katt med ett specifikt ID
         [HttpGet]
-        [Route("getCatsById/{Id}")]
+        [Route("getCatById/{catId}")]
         public async Task<IActionResult> GetCatById(Guid catId)
         {
+            // Anropa GetCatByIdQuery med det specifika ID för att hämta en katt från databasen
             return Ok(await _mediator.Send(new GetCatByIdQuery(catId)));
         }
 
-        // Create a new cat
+        // Skapa en ny katt
         [HttpPost]
         [Route("addNewCat")]
         public async Task<IActionResult> AddCat([FromBody] CatDto newCat)
         {
+            // Anropa AddCatCommand för att lägga till en ny katt i databasen
             return Ok(await _mediator.Send(new AddCatCommand(newCat)));
         }
 
-        // Update a specific cat
+        // Uppdatera en specifik katt
         [HttpPut]
-        [Route("updateCat/{updatedCatId}")]
-        public async Task<IActionResult> UpdateCat([FromBody] CatDto updatedCat, Guid updatedCatId)
+        [Route("updateCat/{catId}")]
+        public async Task<IActionResult> UpdateCat(Guid catId, [FromBody] CatDto updatedCat)
         {
-            return Ok(await _mediator.Send(new UpdateCatByIdCommand(updatedCat, updatedCatId)));
+            // Anropa UpdateCatByIdCommand med det specifika ID för att uppdatera en katt i databasen
+            var command = new UpdateCatByIdCommand(updatedCat, catId);
+            var result = await _mediator.Send(command);
+
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound("Cat not found.");
+            }
         }
 
-        // Delete a specific cat by Id
+        // Ta bort en specifik katt, om lyckat returnera "Katten har tagits bort" om inte "Katten hittades inte".
         [HttpDelete]
         [Route("deleteCat/{catId}")]
         public async Task<IActionResult> DeleteCat(Guid catId)
         {
-            return Ok(await _mediator.Send(new CatsDelete(catId)));
+            // Anropa DeleteCatCommand med det specifika ID för att ta bort en katt från databasen
+            var success = await _mediator.Send(new DeleteCatCommand(catId));
+
+            if (success)
+            {
+                return Ok("Cat deleted successfully.");
+            }
+            else
+            {
+                return NotFound("Cat not found.");
+            }
         }
     }
 }

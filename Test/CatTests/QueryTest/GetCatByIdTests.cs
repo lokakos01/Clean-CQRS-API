@@ -1,5 +1,10 @@
 ﻿using Application.Queries.Cats.GetById;
 using Infrastructure.Database;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Test.CatTests.QueryTest
 {
@@ -15,13 +20,15 @@ namespace Test.CatTests.QueryTest
             // Initialize the handler and mock database before each test
             _mockDatabase = new MockDatabase();
             _handler = new GetCatByIdQueryHandler(_mockDatabase);
+
+
         }
 
         [Test]
         public async Task Handle_ValidId_ReturnsCorrectCat()
         {
             // Arrange
-            var catId = new Guid("12345678-1234-5678-1234-567812345678");
+            var catId = new Guid("87654321-4321-8765-4321-987654321987");
 
             var query = new GetCatByIdQuery(catId);
 
@@ -47,5 +54,7 @@ namespace Test.CatTests.QueryTest
             // Assert
             Assert.IsNull(result);
         }
+
     }
+
 }

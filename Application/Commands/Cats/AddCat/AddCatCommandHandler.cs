@@ -4,9 +4,9 @@ using Domain.Models.Animal;
 using Infrastructure.Database;
 using MediatR;
 
-namespace Application.Commands.Cats
+namespace Application.Commands.Cats.AddCat
 {
-    internal sealed class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat>
+    public class AddCatCommandHandler : IRequestHandler<AddCatCommand, Cat>
     {
         private readonly MockDatabase _mockDatabase;
 
@@ -27,5 +27,6 @@ namespace Application.Commands.Cats
 
             return Task.FromResult(catToCreate);
         }
+
     }
 }
